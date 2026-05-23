@@ -2,10 +2,15 @@ export const runtime = "edge";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const geo = (req as any).geo;
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  
+  const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+  const geoData = await geoRes.json();
+
   return NextResponse.json({
-    country: geo?.country || "Only available on production",
-    city: geo?.city || "Test on your deployed URL",
+    country: geoData.country || "Unknown",
+    city: geoData.city || "Unknown",
+    ip: ip,
     runtime: "edge",
   });
 }
